@@ -3,10 +3,9 @@ package ru.appline.framework.managers;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-/**
- * @author Arkadiy_Alaverdyan
- * Класс для управления веб драйвером
- */
+import static ru.appline.framework.utils.PropConst.PATH_CHROME_DRIVER_WINDOWS;
+
+
 public class DriverManager {
 
     /**

@@ -1,5 +1,6 @@
 package ru.appline.framework.pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -10,6 +11,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.appline.framework.classes.Converter;
 import ru.appline.framework.managers.DriverManager;
 import ru.appline.framework.managers.PageManager;
+import ru.appline.framework.managers.TestPropManager;
+
+import java.util.concurrent.TimeUnit;
+
+import static ru.appline.framework.utils.PropConst.IMPLICITLY_WAIT;
 
 public class BasePage {
 
@@ -20,7 +26,7 @@ public class BasePage {
      */
 
 
-
+    private static final TestPropManager props = TestPropManager.getTestPropManager();
     protected final DriverManager driverManager = DriverManager.getDriverManager();
 
 
@@ -139,13 +145,18 @@ public class BasePage {
     }
 
     //Проверка существует ли элемент
-    public boolean isElementPresent(WebElement element) {
+    public boolean isElementPresent(By by) {
+        boolean flag = false;
         try {
-            element.isDisplayed();
-            return true;
-        } catch (NoSuchElementException e) {
-            return false;
+            driverManager.getDriver().manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+            driverManager.getDriver().findElement(by);
+            flag = true;
+        } catch (NoSuchElementException ignore) {
+
+        }finally {
+            driverManager.getDriver().manage().timeouts().implicitlyWait(Integer.parseInt(props.getProperty(IMPLICITLY_WAIT)), TimeUnit.SECONDS);
         }
+        return flag;
     }
 
 }

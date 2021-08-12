@@ -1,10 +1,10 @@
 package ru.appline.framework.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import ru.appline.framework.classes.Conteiner;
 import ru.appline.framework.classes.Converter;
 import ru.appline.framework.classes.Product;
 
@@ -47,55 +47,78 @@ public class ProductPage extends BasePage {
     @FindBy(xpath = "//div[@class = 'product-buy product-buy_one-line']//button[@class[contains(.,'button-ui buy-btn')]]")
     private WebElement cartButton;
 
-    private String flag = "default";
+
+
+
+    public ProductPage saveProduct(){
+        Product temporaryVariable = new Product();
+        temporaryVariable.setName(productName.getText());
+
+        //Есть ли гарантия у продукта
+
+        if (isElementPresent(By.xpath("//div[text()[contains(.,'Гарантия')]]"))){
+            guaranteeMenu.click();
+            if (driverManager.getDriver().findElement(By.xpath("//input[@value =  'default']")).isSelected()){
+                temporaryVariable.setWarrantyCost(0);
+            }
+            if (driverManager.getDriver().findElement(By.xpath("//input[@value =  '0']")).isSelected()){
+                temporaryVariable.setWarrantyCost(Converter.convertСurrencyFromStringToInteger(productWarrantyCost12.getText()));
+            }
+            if (driverManager.getDriver().findElement(By.xpath("//input[@value =  '1']")).isSelected()){
+                temporaryVariable.setWarrantyCost(Converter.convertСurrencyFromStringToInteger(productWarrantyCost24.getText()));
+            }
+
+        } else {
+            temporaryVariable.setWarrantyCost(0);
+        }
+        temporaryVariable.setPrice(Converter.convertСurrencyFromStringToInteger(productPrice.getText()) - temporaryVariable.getWarrantyCost());
+        Conteiner.getMapProduct().put(productName.getText() , temporaryVariable);
+        return this;
+    }
 
     public ProductPage chooseAdditionalGuarantee(String guaranteePeriod){
         guaranteeMenu.click();
         switch (guaranteePeriod) {
             case "24":
                 aditionalGuarantee24.click();
-                flag = "24";
                 break;
             case "12":
                 aditionalGuarantee12.click();
-                flag = "12";
                 break;
             case "default":
                 aditionalGuarantee.click();
-                flag = "default";
                 break;
         }
         return this;
-        //return pageManager.productPageGuaranteeBlock();
+
     }
 
-    public Product getProduct(){
-
-        Product temporaryVariable = new Product();
-        temporaryVariable.setName(productName.getText());
-
-        if (isElementPresent(guaranteeMenu)){
-            switch (flag) {
-            case "24":
-                guaranteeMenu.click();
-                temporaryVariable.setWarrantyCost(Converter.convertСurrencyFromStringToInteger(productWarrantyCost24.getText()));
-                break;
-            case "12":
-                guaranteeMenu.click();
-                temporaryVariable.setWarrantyCost(Converter.convertСurrencyFromStringToInteger(productWarrantyCost12.getText()));
-                break;
-                case "default":
-                temporaryVariable.setWarrantyCost(0);
-                break;
-            }
-        } else {
-            flag = "default";
-            temporaryVariable.setWarrantyCost(0);
-        }
-
-        temporaryVariable.setPrice(Converter.convertСurrencyFromStringToInteger(productPrice.getText()) - temporaryVariable.getWarrantyCost());
-        return temporaryVariable;
-    }
+//    public Product getProduct(){
+//
+//
+//
+//        if (isElementPresent(By.xpath("//div[text()[contains(.,'Гарантия')]]"))){
+//            switch (flag) {
+//            case "24":
+//                guaranteeMenu.click();
+//
+//                break;
+//            case "12":
+//                guaranteeMenu.click();
+//
+//                break;
+//                case "default":
+//
+//                break;
+//            }
+//        } else {
+//            flag = "default";
+//
+//        }
+//
+//         - temporaryVariable.getWarrantyCost());
+//        return temporaryVariable;
+//    }
 
     public ProductPage addToCart(){
         if (driverManager.getDriver().findElement(By.xpath("//span[@class = 'cart-link__lbl']")).getText().contains("Корзина")){
